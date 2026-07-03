@@ -1,60 +1,134 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import CourseCard from '../components/CourseCard';
 import productService from '../services/productService';
-import { useCarrito } from '../context/CarritoContext';
 
-export default function Cursos(){
+export default function Cursos() {
   const [cursos, setCursos] = useState([]);
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todos');
-  const [textoBusqueda, setTextoBusqueda] = useState('');
-  const carrito = useCarrito();
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(()=>{ productService.getCursos().then(d=>setCursos(d)).catch(()=>alert('Error al cargar los cursos')); }, []);
+  useEffect(() => {
+    async function cargarCursos() {
+      try {
+        setCargando(true);
+        setError('');
 
-  const cursosFiltrados = cursos.filter(c=> (categoriaSeleccionada==='Todos' || c.categoria===categoriaSeleccionada) && (textoBusqueda.trim()==='' || c.nombre.toLowerCase().includes(textoBusqueda.toLowerCase())));
+        const data = await productService.obtenerCursos();
+        setCursos(data);
+      } catch (err) {
+        console.error('Error cargando cursos:', err);
+        setError(
+          'No se pudieron cargar los cursos. Verifica que JSON Server esté activo.'
+        );
+        setCursos([]);
+      } finally {
+        setCargando(false);
+      }
+    }
 
-  function agregarCarrito(curso){ const item = { id: 'curso-' + curso.id, nombre: curso.nombre, categoria: curso.categoria, precio: curso.precio }; carrito.agregarProducto(item); alert(`${curso.nombre} agregado al carrito`); }
+    cargarCursos();
+  }, []);
+
+  const nivelesUnicos = Array.from(new Set(cursos.map((curso) => curso.nivel)));
 
   return (
-    <main className="contenedor" style={{padding:20}}>
-      <div className="d-flex justify-content-between align-items-center mb-4"><h2>Cursos disponibles</h2></div>
-      <div className="mb-4">
-        <label className="form-label">Filtrar por categoría</label>
-        <select className="form-select" value={categoriaSeleccionada} onChange={e=>setCategoriaSeleccionada(e.target.value)}>
-          <option>Todos</option>
-          <option>Programación</option>
-          <option>Diseño Web</option>
-          <option>Base de Datos</option>
-          <option>Full Stack</option>
-          <option>Gestión</option>
-          <option>Ciberseguridad</option>
-          <option>Scrum</option>
-        </select>
-      </div>
-      <div className="mb-4">
-        <label className="form-label">Buscar curso</label>
-        <input type="text" className="form-control" placeholder="Buscar curso..." value={textoBusqueda} onChange={e=>setTextoBusqueda(e.target.value)} />
-      </div>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.1fr_0.7fr] lg:items-center">
+          <div>
+            <span className="inline-flex rounded-full bg-blue-100 px-4 py-2 text-xs font-bold text-blue-700">
+              Cursos MTECGYacademic
+            </span>
 
-      <div className="cursos">
-        {cursosFiltrados.map(c=> (
-          <div key={c.id} className="card mb-3 p-3">
-            <div style={{display:'flex',gap:12}}>
-              <img src={c.imagen} alt={c.nombre} style={{width:120,height:80,objectFit:'cover'}} />
-              <div>
-                <h3>{c.nombre.toUpperCase()}</h3>
-                <p className="docente">Docente: {c.docente}</p>
-                <p>{c.descripcion}</p>
-                <p>Categoría: <strong>{c.categoria}</strong></p>
-                <h4>{c.precio===0 ? 'Gratis' : `S/ ${c.precio.toFixed(2)}`}</h4>
-                <p className={c.stock>0 ? 'text-success' : 'text-danger'}>Stock: {c.stock}</p>
-                <button className="btn btn-primary" onClick={()=>agregarCarrito(c)}>Agregar al carrito</button>
+            <h1 className="mt-4 max-w-4xl text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
+              Formación práctica para crecer en el mundo digital
+            </h1>
+
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
+              Cursos orientados a programación, diseño web, herramientas
+              digitales y desarrollo tecnológico para fortalecer tus habilidades
+              académicas y profesionales.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg shadow-blue-100">
+            <h2 className="text-xl font-extrabold text-slate-950">
+              Aprende con enfoque práctico
+            </h2>
+
+            <div className="mt-5 grid grid-cols-3 gap-3">
+              <div className="rounded-2xl bg-blue-50 p-4 text-center">
+                <p className="text-2xl font-extrabold text-blue-700">
+                  {cursos.length}
+                </p>
+                <p className="text-xs font-bold text-slate-500">
+                  Cursos
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-sky-50 p-4 text-center">
+                <p className="text-2xl font-extrabold text-sky-700">
+                  {nivelesUnicos.length}
+                </p>
+                <p className="text-xs font-bold text-slate-500">
+                  Niveles
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-emerald-50 p-4 text-center">
+                <p className="text-2xl font-extrabold text-emerald-700">
+                  100%
+                </p>
+                <p className="text-xs font-bold text-slate-500">
+                  En línea
+                </p>
               </div>
             </div>
           </div>
-        ))}
+        </div>
+      </section>
 
-        {cursosFiltrados.length === 0 && <p className="text-center mt-4">No se encontraron cursos con ese criterio.</p>}
-      </div>
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+              Cursos disponibles
+            </h2>
+          </div>
+
+          {cargando && (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center font-semibold text-blue-700">
+              Cargando cursos...
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center font-semibold text-red-700">
+              {error}
+            </div>
+          )}
+
+          {!cargando && !error && cursos.length > 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {cursos.map((curso) => (
+                <CourseCard key={curso.id} curso={curso} />
+              ))}
+            </div>
+          )}
+
+          {!cargando && !error && cursos.length === 0 && (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-8 text-center">
+              <h2 className="text-2xl font-bold text-slate-900">
+                No hay cursos disponibles
+              </h2>
+
+              <p className="mt-2 text-slate-600">
+                Verifica que JSON Server esté funcionando correctamente.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
     </main>
   );
 }

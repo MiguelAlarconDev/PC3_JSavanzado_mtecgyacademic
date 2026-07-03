@@ -1,60 +1,90 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import OfferCard from '../components/OfferCard';
 import productService from '../services/productService';
-import { useCarrito } from '../context/CarritoContext';
-import './productos.css';
 
 export default function Ofertas() {
-  const [productosEnOferta, setProductosEnOferta] = useState([]);
-  const descuentoPorcentaje = 30;
-  const carrito = useCarrito();
+  const [ofertas, setOfertas] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(() => { cargarProductosEnOferta(); }, []);
+  useEffect(() => {
+    async function cargarOfertas() {
+      try {
+        setCargando(true);
+        setError('');
 
-  async function cargarProductosEnOferta() {
-    try {
-      const data = await productService.obtenerProductos();
-      setProductosEnOferta(data.slice(0, 4));
-    } catch (err) { console.error(err); }
-  }
+        const data = await productService.obtenerOfertas();
+        setOfertas(data);
+      } catch (err) {
+        console.error('Error cargando ofertas:', err);
+        setError(
+          'No se pudieron cargar las ofertas. Verifica que JSON Server esté activo.'
+        );
+        setOfertas([]);
+      } finally {
+        setCargando(false);
+      }
+    }
 
-  function calcularPrecioConDescuento(precio) { return precio - (precio * descuentoPorcentaje / 100); }
-
-  function agregarAlCarrito(producto) {
-    const productoConDescuento = { ...producto, precio: calcularPrecioConDescuento(producto.precio) };
-    carrito.agregarProducto(productoConDescuento);
-    alert(`${producto.nombre} agregado al carrito con ${descuentoPorcentaje}% de descuento`);
-  }
+    cargarOfertas();
+  }, []);
 
   return (
-    <div className="ofertas-container">
-      <div className="container py-5">
-        <div className="row mb-5 align-items-center">
-          <div className="col-md-8"><h1 className="mb-3">Ofertas especiales</h1><p className="lead text-muted">¡Descuentos increíbles en productos seleccionados!</p></div>
-          <div className="col-md-4 text-center"><div className="badge-descuento"><span className="descuento-texto">-{descuentoPorcentaje}%</span></div></div>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl text-center">
+          <span className="inline-flex rounded-full bg-blue-100 px-5 py-2 text-sm font-bold text-blue-700">
+            Ofertas MTECGYacademic
+          </span>
         </div>
-        <div className="row g-4">
-          {productosEnOferta.map(producto=> (
-            <div key={producto.id} className="col-md-6 col-lg-4 col-xl-3">
-              <div className="card h-100 shadow-sm card-oferta" style={{position:'relative'}}>
-                <div className="badge bg-danger position-absolute top-0 start-0 m-2">-{descuentoPorcentaje}%</div>
-                <img src={producto.imagen} className="card-img-top" alt={producto.nombre} style={{height:200,objectFit:'cover'}} />
-                <div className="card-body">
-                  <h5 className="card-title">{producto.nombre}</h5>
-                  <p className="card-text text-muted small">{producto.categoria}</p>
-                  <div className="mb-3">
-                    <p className="text-muted text-decoration-line-through mb-1">{new Intl.NumberFormat('es-PE',{style:'currency',currency:'USD'}).format(producto.precio)}</p>
-                    <p className="h5 text-danger">{new Intl.NumberFormat('es-PE',{style:'currency',currency:'USD'}).format(calcularPrecioConDescuento(producto.precio))}</p>
-                  </div>
-                  <p className="card-text small">{producto.stock>0 ? <span className="text-success">En stock</span> : <span className="text-danger">Sin stock</span>}</p>
-                </div>
-                <div className="card-footer bg-white">
-                  <button className="btn btn-danger w-100" disabled={producto.stock===0} onClick={()=>agregarAlCarrito(producto)}>Comprar ahora</button>
-                </div>
-              </div>
+      </section>
+
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+              Ofertas disponibles
+            </h1>
+
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+              Promociones especiales en cursos, paquetes académicos y productos
+              tecnológicos para estudiantes.
+            </p>
+          </div>
+
+          {cargando && (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center font-semibold text-blue-700">
+              Cargando ofertas...
             </div>
-          ))}
+          )}
+
+          {error && (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center font-semibold text-red-700">
+              {error}
+            </div>
+          )}
+
+          {!cargando && !error && ofertas.length > 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {ofertas.map((oferta) => (
+                <OfferCard key={oferta.id} oferta={oferta} />
+              ))}
+            </div>
+          )}
+
+          {!cargando && !error && ofertas.length === 0 && (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-8 text-center">
+              <h2 className="text-2xl font-bold text-slate-900">
+                No hay ofertas disponibles
+              </h2>
+
+              <p className="mt-2 text-slate-600">
+                Verifica que JSON Server esté funcionando correctamente.
+              </p>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

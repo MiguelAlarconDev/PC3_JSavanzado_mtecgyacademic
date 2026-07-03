@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const CarritoContext = createContext(null);
 
@@ -6,63 +6,129 @@ export function useCarrito() {
   return useContext(CarritoContext);
 }
 
+function obtenerCarritoInicial() {
+  try {
+    const carritoGuardado = localStorage.getItem('carrito');
+    return carritoGuardado ? JSON.parse(carritoGuardado) : [];
+  } catch (error) {
+    console.error('Error al leer el carrito desde localStorage:', error);
+    return [];
+  }
+}
+
+function calcularCantidad(listaCarrito) {
+  return listaCarrito.reduce(
+    (total, producto) => total + Number(producto.cantidad || 0),
+    0
+  );
+}
+
 export function CarritoProvider({ children }) {
-  const [carrito, setCarrito] = useState(() => {
-    try {
-      const raw = localStorage.getItem('carrito');
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  });
+  const [carrito, setCarrito] = useState(obtenerCarritoInicial);
+
+  function guardarYActualizar(nuevoCarrito) {
+    setCarrito(nuevoCarrito);
+    localStorage.setItem('carrito', JSON.stringify(nuevoCarrito));
+
+    window.dispatchEvent(
+      new CustomEvent('carritoActualizado', {
+        detail: {
+          carrito: nuevoCarrito,
+          cantidad: calcularCantidad(nuevoCarrito),
+        },
+      })
+    );
+  }
 
   useEffect(() => {
     localStorage.setItem('carrito', JSON.stringify(carrito));
   }, [carrito]);
 
-  const contarProductos = () => carrito.reduce((t, i) => t + (i.cantidad || 0), 0);
+  const cantidadProductos = useMemo(() => {
+    return calcularCantidad(carrito);
+  }, [carrito]);
 
-  const guardarCarrito = (nuevo) => {
-    setCarrito(nuevo);
-  };
+  const totalCarrito = useMemo(() => {
+    return carrito.reduce(
+      (total, producto) =>
+        total + Number(producto.precio || 0) * Number(producto.cantidad || 0),
+      0
+    );
+  }, [carrito]);
 
-  const agregarProducto = (producto) => {
-    setCarrito(prev => {
-      const existing = prev.find(p => p.id === producto.id);
-      if (existing) {
-        return prev.map(p => p.id === producto.id ? { ...p, cantidad: p.cantidad + 1 } : p);
-      }
-      return [...prev, { ...producto, cantidad: 1 }];
-    });
-    alert(`${producto.nombre} agregado al carrito`);
-  };
+  function agregarProducto(producto) {
+    const productoExiste = carrito.find((item) => item.id === producto.id);
 
-  const aumentarCantidad = (id) => {
-    setCarrito(prev => prev.map(p => p.id === id ? { ...p, cantidad: p.cantidad + 1 } : p));
-  };
+    let nuevoCarrito;
 
-  const disminuirCantidad = (id) => {
-    setCarrito(prev => {
-      const producto = prev.find(p => p.id === id);
-      if (!producto) return prev;
-      if (producto.cantidad > 1) {
-        return prev.map(p => p.id === id ? { ...p, cantidad: p.cantidad - 1 } : p);
-      }
-      return prev.filter(p => p.id !== id);
-    });
-  };
+    if (productoExiste) {
+      nuevoCarrito = carrito.map((item) =>
+        item.id === producto.id
+          ? {
+              ...item,
+              cantidad: Number(item.cantidad || 0) + 1,
+            }
+          : item
+      );
+    } else {
+      nuevoCarrito = [
+        ...carrito,
+        {
+          ...producto,
+          cantidad: 1,
+        },
+      ];
+    }
 
-  const eliminarProducto = (id) => {
-    setCarrito(prev => prev.filter(p => p.id !== id));
-  };
+    guardarYActualizar(nuevoCarrito);
+  }
 
-  const vaciarCarrito = () => setCarrito([]);
+  function aumentarCantidad(id) {
+    const nuevoCarrito = carrito.map((producto) =>
+      producto.id === id
+        ? {
+            ...producto,
+            cantidad: Number(producto.cantidad || 0) + 1,
+          }
+        : producto
+    );
 
-  const calcularTotal = () => carrito.reduce((total, item) => total + (item.precio * (item.cantidad || 0)), 0);
+    guardarYActualizar(nuevoCarrito);
+  }
+
+  function disminuirCantidad(id) {
+    const nuevoCarrito = carrito
+      .map((producto) =>
+        producto.id === id
+          ? {
+              ...producto,
+              cantidad: Number(producto.cantidad || 0) - 1,
+            }
+          : producto
+      )
+      .filter((producto) => Number(producto.cantidad || 0) > 0);
+
+    guardarYActualizar(nuevoCarrito);
+  }
+
+  function eliminarProducto(id) {
+    const nuevoCarrito = carrito.filter((producto) => producto.id !== id);
+    guardarYActualizar(nuevoCarrito);
+  }
+
+  function vaciarCarrito() {
+    guardarYActualizar([]);
+  }
+
+  function calcularTotal() {
+    return totalCarrito;
+  }
 
   const value = {
     carrito,
-    cantidad: contarProductos(),
+    cantidad: cantidadProductos,
+    cantidadProductos,
+    totalCarrito,
     agregarProducto,
     aumentarCantidad,
     disminuirCantidad,

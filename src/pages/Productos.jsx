@@ -1,112 +1,167 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import ProductCard from '../components/ProductCard';
 import productService from '../services/productService';
 import { useCarrito } from '../context/CarritoContext';
-import './productos.css';
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
   const [categorias, setCategorias] = useState([]);
-  const [buscador, setBuscador] = useState('');
+  const [busqueda, setBusqueda] = useState('');
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [mensajeCarrito, setMensajeCarrito] = useState('');
 
   const carrito = useCarrito();
 
   useEffect(() => {
+    async function cargarProductos() {
+      try {
+        setCargando(true);
+        setError('');
+
+        const data = await productService.obtenerProductos();
+
+        setProductos(data);
+        setProductosFiltrados(data);
+
+        const categoriasUnicas = Array.from(
+          new Set(data.map((producto) => producto.categoria))
+        );
+
+        setCategorias(['Todas', ...categoriasUnicas]);
+      } catch (err) {
+        console.error('Error cargando productos:', err);
+        setError(
+          'No se pudieron cargar los productos. Verifica que JSON Server esté activo.'
+        );
+        setProductos([]);
+        setProductosFiltrados([]);
+      } finally {
+        setCargando(false);
+      }
+    }
+
     cargarProductos();
   }, []);
 
-  async function cargarProductos() {
-    try {
-      const data = await productService.obtenerProductos();
-      setProductos(data);
-      setProductosFiltrados(data);
-      extraerCategorias(data);
-    } catch (err) {
-      console.error('Error cargando productos:', err);
-      setProductosFiltrados([]);
-    }
-  }
+  useEffect(() => {
+    const resultado = productos.filter((producto) => {
+      const coincideBusqueda =
+        producto.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+        producto.descripcion.toLowerCase().includes(busqueda.toLowerCase());
 
-  function extraerCategorias(list) {
-    const cats = Array.from(new Set(list.map(p => p.categoria)));
-    setCategorias(['Todas', ...cats]);
-  }
+      const coincideCategoria =
+        categoriaSeleccionada === 'Todas' ||
+        producto.categoria === categoriaSeleccionada;
 
-  function filtrar() {
-    const filtered = productos.filter(p => {
-      const cumpleBusqueda = p.nombre.toLowerCase().includes(buscador.toLowerCase());
-      const cumpleCategoria = categoriaSeleccionada === 'Todas' || p.categoria === categoriaSeleccionada;
-      return cumpleBusqueda && cumpleCategoria;
+      return coincideBusqueda && coincideCategoria;
     });
-    setProductosFiltrados(filtered);
-  }
 
-  useEffect(() => { filtrar(); }, [buscador, categoriaSeleccionada, productos]);
+    setProductosFiltrados(resultado);
+  }, [busqueda, categoriaSeleccionada, productos]);
 
   function agregarAlCarrito(producto) {
+    console.log('Producto recibido en Productos.jsx:', producto);
+
+    if (!carrito || typeof carrito.agregarProducto !== 'function') {
+      console.error('El contexto del carrito no está disponible.');
+      setMensajeCarrito('No se pudo agregar el producto. Revisa el carrito.');
+      return;
+    }
+
     carrito.agregarProducto(producto);
+    setMensajeCarrito(`${producto.nombre} se agregó al carrito.`);
+
+    setTimeout(() => {
+      setMensajeCarrito('');
+    }, 2500);
   }
 
-  const formatoPrecio = (v) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'USD' }).format(v);
-
   return (
-    <div className="productos-container">
-      <div className="container py-5">
-        <h1 className="mb-4">Nuestros productos</h1>
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl text-center">
+          <span className="inline-flex rounded-full bg-blue-100 px-5 py-2 text-sm font-bold text-blue-700">
+            Productos MTECGYacademic
+          </span>
+        </div>
+      </section>
 
-        <div className="row mb-4">
-          <div className="col-md-6">
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
+              Productos disponibles
+            </h1>
+          </div>
+
+          {mensajeCarrito && (
+            <div className="fixed right-5 top-24 z-[999] max-w-sm rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-700 shadow-lg">
+              {mensajeCarrito}
+            </div>
+          )}
+
+          <div className="mx-auto mb-8 grid max-w-3xl gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-[1fr_220px]">
             <input
               type="text"
-              className="form-control"
-              placeholder="Buscar productos..."
-              value={buscador}
-              onChange={e => setBuscador(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              placeholder="Buscar producto..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
             />
-          </div>
-          <div className="col-md-6">
+
             <select
-              className="form-select"
+              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               value={categoriaSeleccionada}
-              onChange={e => setCategoriaSeleccionada(e.target.value)}
+              onChange={(e) => setCategoriaSeleccionada(e.target.value)}
             >
-              {categorias.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              {categorias.map((categoria) => (
+                <option key={categoria} value={categoria}>
+                  {categoria}
+                </option>
+              ))}
             </select>
           </div>
-        </div>
 
-        <div className="row g-4">
-          {productosFiltrados.map(producto => (
-            <div key={producto.id} className="col-md-6 col-lg-4 col-xl-3">
-              <div className="card h-100 shadow-sm">
-                <img src={producto.imagen} className="card-img-top" alt={producto.nombre} style={{height:200, objectFit:'cover'}} />
-                <div className="card-body">
-                  <h5 className="card-title">{producto.nombre}</h5>
-                  <p className="card-text text-muted">{producto.categoria}</p>
-                  <p className="card-text">
-                    {producto.stock > 0 ? (
-                      <small style={{color: producto.stock <=5 ? 'orange' : 'green', fontWeight:'bold'}}>Stock: {producto.stock}</small>
-                    ) : (
-                      <small style={{color:'red', fontWeight:'bold'}}>Sin stock</small>
-                    )}
-                  </p>
-                  <p className="h5 text-primary mb-3">{formatoPrecio(producto.precio)}</p>
-                </div>
-                <div className="card-footer bg-white">
-                  <button className="btn btn-primary w-100" disabled={producto.stock === 0} onClick={() => agregarAlCarrito(producto)}>
-                    {producto.stock > 0 ? 'Agregar al Carrito' : 'No disponible'}
-                  </button>
-                </div>
-              </div>
+          {cargando && (
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center font-semibold text-blue-700">
+              Cargando productos...
             </div>
-          ))}
-        </div>
+          )}
 
-        {productosFiltrados.length === 0 && (
-          <div className="alert alert-info mt-5 text-center"><p>No se encontraron productos que coincidan con tu búsqueda.</p></div>
-        )}
-      </div>
-    </div>
+          {error && (
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center font-semibold text-red-700">
+              {error}
+            </div>
+          )}
+
+          {!cargando && !error && productosFiltrados.length > 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {productosFiltrados.map((producto) => (
+                <ProductCard
+                  key={producto.id}
+                  producto={producto}
+                  onAgregar={agregarAlCarrito}
+                />
+              ))}
+            </div>
+          )}
+
+          {!cargando && !error && productosFiltrados.length === 0 && (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-8 text-center">
+              <h2 className="text-2xl font-bold text-slate-900">
+                No se encontraron productos
+              </h2>
+
+              <p className="mt-2 text-slate-600">
+                Intenta buscar con otro nombre o selecciona otra categoría.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }

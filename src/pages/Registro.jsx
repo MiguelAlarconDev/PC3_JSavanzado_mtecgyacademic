@@ -1,74 +1,287 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import './registro.css';
 
 export default function Registro() {
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mensajeError, setMensajeError] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
+
   const [usuarios, setUsuarios] = useState(() => {
-    try { const raw = localStorage.getItem('usuarios'); return raw ? JSON.parse(raw) : []; } catch { return []; }
+    try {
+      const raw = localStorage.getItem('usuarios');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
   });
 
-  const validarEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-  const validarPassword = (p) => /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(p);
+  function validarEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
 
-  function correoDuplicado(c) { return usuarios.some(u => u.correo === c); }
+  function validarPassword(passwordValor) {
+    return /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(passwordValor);
+  }
 
-  function registrarUsuario() {
-    setMensajeError(''); setMensajeExito('');
-    if (!nombre || !correo || !password) { setMensajeError('Todos los campos son obligatorios.'); return; }
-    if (!validarEmail(correo)) { setMensajeError('Correo electrónico inválido.'); return; }
-    if (!validarPassword(password)) { setMensajeError('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número.'); return; }
-    if (correoDuplicado(correo)) { setMensajeError('El correo electrónico ya está registrado.'); return; }
+  function correoDuplicado(correoValor) {
+    return usuarios.some(
+      (usuario) => usuario.correo.toLowerCase() === correoValor.toLowerCase()
+    );
+  }
 
-    const nuevo = { nombre, correo, fechaRegistro: new Date().toISOString() };
-    const next = [...usuarios, nuevo];
-    setUsuarios(next);
-    localStorage.setItem('usuarios', JSON.stringify(next));
-    setMensajeExito('¡Registro exitoso! Bienvenido a MTecGY Academy.');
-    setNombre(''); setCorreo(''); setPassword('');
+  function registrarUsuario(e) {
+    e.preventDefault();
+
+    setMensajeError('');
+    setMensajeExito('');
+
+    const nombreLimpio = nombre.trim();
+    const correoLimpio = correo.trim();
+
+    if (!nombreLimpio || !correoLimpio || !password) {
+      setMensajeError('Todos los campos son obligatorios.');
+      return;
+    }
+
+    if (nombreLimpio.length < 3) {
+      setMensajeError('El nombre debe tener al menos 3 caracteres.');
+      return;
+    }
+
+    if (!validarEmail(correoLimpio)) {
+      setMensajeError('Ingresa un correo electrónico válido.');
+      return;
+    }
+
+    if (!validarPassword(password)) {
+      setMensajeError(
+        'La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número.'
+      );
+      return;
+    }
+
+    if (correoDuplicado(correoLimpio)) {
+      setMensajeError('El correo electrónico ya está registrado.');
+      return;
+    }
+
+    const nuevoUsuario = {
+      id: Date.now(),
+      nombre: nombreLimpio,
+      correo: correoLimpio,
+      fechaRegistro: new Date().toISOString(),
+    };
+
+    const usuariosActualizados = [...usuarios, nuevoUsuario];
+
+    setUsuarios(usuariosActualizados);
+    localStorage.setItem('usuarios', JSON.stringify(usuariosActualizados));
+
+    setMensajeExito('Registro exitoso. Ya puedes iniciar sesión en MTECGYacademic.');
+    setNombre('');
+    setCorreo('');
+    setPassword('');
+  }
+
+  function formatearFecha(fecha) {
+    return new Date(fecha).toLocaleString('es-PE', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
   }
 
   return (
-    <main className="contenedor registro-container" style={{padding:20}}>
-      <div className="card registro-card" style={{maxWidth:700, margin:'0 auto', padding:20}}>
-        <h2>Crear cuenta</h2>
-        <p className="texto-registro">Regístrate en MTecGY Academy</p>
-        {mensajeError && <div className="alert alert-danger">{mensajeError}</div>}
-        {mensajeExito && <div className="alert alert-success">{mensajeExito}</div>}
+    <main className="min-h-screen bg-slate-50">
+      <section className="bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl text-center">
+          <span className="inline-flex rounded-full bg-blue-100 px-5 py-2 text-sm font-bold text-blue-700">
+            Registro MTECGYacademic
+          </span>
+        </div>
+      </section>
 
-        <div className="mb-3">
-          <label className="form-label">Nombre completo</label>
-          <input className="form-control" value={nombre} onChange={e=>setNombre(e.target.value)} />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Correo electrónico</label>
-          <input type="email" className="form-control" value={correo} onChange={e=>setCorreo(e.target.value)} />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Contraseña</label>
-          <input type="password" className="form-control" value={password} onChange={e=>setPassword(e.target.value)} />
-        </div>
-        <button className="btn-registro w-100 btn btn-primary" onClick={registrarUsuario}>Registrarse</button>
+      <section className="px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <form
+            onSubmit={registrarUsuario}
+            className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-xl shadow-blue-100"
+            noValidate
+          >
+            <div className="mb-7">
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-950">
+                Crear cuenta
+              </h1>
 
-        <p className="texto-login mt-3">¿Ya tienes una cuenta? <Link to="/">Iniciar sesión</Link></p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Regístrate para formar parte de MTECGYacademic y acceder a una
+                experiencia académica más personalizada.
+              </p>
+            </div>
 
-        <div className="usuarios-registrados mt-3">
-          <h3>Usuarios registrados</h3>
-          {usuarios.length === 0 ? (
-            <p>No hay usuarios registrados aún.</p>
-          ) : (
-            <ul className="lista-usuarios">
-              {usuarios.map(u => (
-                <li key={u.correo}><strong>{u.nombre.toUpperCase()}</strong> - {u.correo}<br/><small>Registrado el: {new Date(u.fechaRegistro).toLocaleString()}</small></li>
-              ))}
-            </ul>
-          )}
+            {mensajeError && (
+              <div className="mb-5 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-bold text-red-700">
+                {mensajeError}
+              </div>
+            )}
+
+            {mensajeExito && (
+              <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
+                {mensajeExito}
+              </div>
+            )}
+
+            <div className="grid gap-5">
+              <div>
+                <label
+                  htmlFor="nombre"
+                  className="mb-2 block text-sm font-bold text-slate-700"
+                >
+                  Nombre completo
+                </label>
+
+                <input
+                  id="nombre"
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  placeholder="Ejemplo: Yulisa Nayra"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="correo"
+                  className="mb-2 block text-sm font-bold text-slate-700"
+                >
+                  Correo electrónico
+                </label>
+
+                <input
+                  id="correo"
+                  type="email"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  placeholder="correo@ejemplo.com"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="password"
+                  className="mb-2 block text-sm font-bold text-slate-700"
+                >
+                  Contraseña
+                </label>
+
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <input
+                    id="password"
+                    type={mostrarPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Crea una contraseña segura"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setMostrarPassword((estado) => !estado)}
+                    className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 transition hover:border-blue-600 hover:text-blue-700"
+                  >
+                    {mostrarPassword ? 'Ocultar' : 'Mostrar'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="mt-7 w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700"
+            >
+              Registrarse
+            </button>
+
+            <div className="my-7 flex items-center gap-3">
+              <div className="h-px flex-1 bg-slate-200" />
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                Acceso
+              </span>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+
+            <p className="text-center text-sm text-slate-600">
+              ¿Ya tienes una cuenta?{' '}
+              <Link
+                to="/login"
+                className="font-extrabold text-blue-700 hover:text-blue-800"
+              >
+                Inicia sesión aquí
+              </Link>
+            </p>
+
+            <div className="mt-7 rounded-2xl bg-slate-50 p-5">
+              <p className="text-sm font-extrabold text-slate-800">
+                Requisitos de contraseña
+              </p>
+
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                <li>Mínimo 8 caracteres.</li>
+                <li>Al menos una letra mayúscula.</li>
+                <li>Al menos un número.</li>
+              </ul>
+            </div>
+          </form>
+
+          <aside className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-sm">
+            <span className="text-sm font-bold uppercase tracking-[0.22em] text-blue-600">
+              Comunidad
+            </span>
+
+            <h2 className="mt-3 text-2xl font-extrabold text-slate-950">
+              Usuarios registrados
+            </h2>
+
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Esta sección muestra los usuarios registrados localmente en la
+              plataforma.
+            </p>
+
+            <div className="mt-6">
+              {usuarios.length === 0 ? (
+                <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5 text-sm font-semibold text-sky-700">
+                  No hay usuarios registrados aún.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {usuarios.map((usuario) => (
+                    <article
+                      key={usuario.correo}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <h3 className="text-sm font-extrabold uppercase text-slate-950">
+                        {usuario.nombre}
+                      </h3>
+
+                      <p className="mt-1 text-sm font-semibold text-blue-700">
+                        {usuario.correo}
+                      </p>
+
+                      <p className="mt-2 text-xs font-semibold text-slate-500">
+                        Registrado el: {formatearFecha(usuario.fechaRegistro)}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

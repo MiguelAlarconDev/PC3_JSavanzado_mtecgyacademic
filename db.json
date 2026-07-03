@@ -1,0 +1,261 @@
+{
+  "productos": [
+    {
+      "id": "1",
+      "nombre": "Laptop Lenovo IdeaPad 3",
+      "descripcion": "Laptop ideal para estudiantes, clases virtuales, programación básica y trabajos académicos.",
+      "categoria": "Laptops",
+      "precio": 1850,
+      "stock": 8,
+      "imagen": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "2",
+      "nombre": "Mouse Inalámbrico Logitech",
+      "descripcion": "Mouse ergonómico, práctico y cómodo para estudiar, diseñar y trabajar por varias horas.",
+      "categoria": "Accesorios",
+      "precio": 65,
+      "stock": 20,
+      "imagen": "https://images.unsplash.com/photo-1527814050087-3793815479db?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "3",
+      "nombre": "Teclado Mecánico RGB",
+      "descripcion": "Teclado resistente con iluminación RGB, recomendado para programación, escritura y gaming.",
+      "categoria": "Accesorios",
+      "precio": 150,
+      "stock": 12,
+      "imagen": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "4",
+      "nombre": "Monitor Samsung 24 pulgadas",
+      "descripcion": "Monitor Full HD para mejorar la productividad en clases, diseño, programación y multitarea.",
+      "categoria": "Monitores",
+      "precio": 620,
+      "stock": 6,
+      "imagen": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "5",
+      "nombre": "Audífonos Bluetooth",
+      "descripcion": "Audífonos inalámbricos con buena autonomía para clases virtuales, reuniones y entretenimiento.",
+      "categoria": "Audio",
+      "precio": 95,
+      "stock": 18,
+      "imagen": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "6",
+      "nombre": "Tablet Samsung Galaxy Tab",
+      "descripcion": "Tablet ligera para lectura, apuntes digitales, videoclases y actividades académicas.",
+      "categoria": "Tablets",
+      "precio": 890,
+      "stock": 5,
+      "imagen": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "7",
+      "nombre": "Memoria USB Kingston 64GB",
+      "descripcion": "Unidad de almacenamiento portátil para guardar trabajos, proyectos, documentos y recursos académicos.",
+      "categoria": "Almacenamiento",
+      "precio": 38,
+      "stock": 25,
+      "imagen": "https://images.unsplash.com/photo-1618410320928-25228d811631?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "8",
+      "nombre": "Disco SSD Externo 1TB",
+      "descripcion": "Disco sólido externo de alta velocidad para respaldar proyectos, archivos pesados y material de estudio.",
+      "categoria": "Almacenamiento",
+      "precio": 390,
+      "stock": 7,
+      "imagen": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?q=80&w=800&auto=format&fit=crop"
+    }
+  ],
+  "cursos": [
+    {
+      "id": "1",
+      "nombre": "JavaScript Básico",
+      "titulo": "JavaScript Básico",
+      "descripcion": "Curso introductorio para aprender variables, funciones, condicionales, arreglos y fundamentos de JavaScript.",
+      "categoria": "Programación",
+      "nivel": "Básico",
+      "duracion": "6 semanas",
+      "docente": "Miguel Alarcón",
+      "precio": 120,
+      "stock": 15,
+      "imagen": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "2",
+      "nombre": "React desde Cero",
+      "titulo": "React desde Cero",
+      "descripcion": "Aprende componentes, props, hooks, rutas, eventos y consumo de datos para crear aplicaciones modernas.",
+      "categoria": "Programación",
+      "nivel": "Intermedio",
+      "duracion": "8 semanas",
+      "docente": "Carlos Ramírez",
+      "precio": 180,
+      "stock": 12,
+      "imagen": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "3",
+      "nombre": "Diseño Web con HTML, CSS y Tailwind",
+      "titulo": "Diseño Web con HTML, CSS y Tailwind",
+      "descripcion": "Diseña interfaces modernas, responsivas y ordenadas usando HTML5, CSS3 y Tailwind CSS.",
+      "categoria": "Diseño Web",
+      "nivel": "Básico",
+      "duracion": "5 semanas",
+      "docente": "Rosa Fernández",
+      "precio": 100,
+      "stock": 18,
+      "imagen": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "4",
+      "nombre": "Base de Datos con MySQL",
+      "titulo": "Base de Datos con MySQL",
+      "descripcion": "Aprende a crear tablas, relaciones, consultas SQL y estructuras de base de datos para proyectos reales.",
+      "categoria": "Base de Datos",
+      "nivel": "Intermedio",
+      "duracion": "6 semanas",
+      "docente": "Luis Mendoza",
+      "precio": 150,
+      "stock": 10,
+      "imagen": "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "5",
+      "nombre": "Desarrollo Full Stack",
+      "titulo": "Desarrollo Full Stack",
+      "descripcion": "Integra frontend, backend, consumo de servicios REST, rutas y persistencia de datos en aplicaciones web.",
+      "categoria": "Full Stack",
+      "nivel": "Avanzado",
+      "duracion": "10 semanas",
+      "docente": "Andrés Torres",
+      "precio": 250,
+      "stock": 8,
+      "imagen": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "6",
+      "nombre": "Gestión de Proyectos Digitales",
+      "titulo": "Gestión de Proyectos Digitales",
+      "descripcion": "Organiza tareas, equipos, entregables y avances de proyectos tecnológicos usando buenas prácticas de gestión.",
+      "categoria": "Gestión",
+      "nivel": "Intermedio",
+      "duracion": "4 semanas",
+      "docente": "María Castillo",
+      "precio": 130,
+      "stock": 14,
+      "imagen": "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "7",
+      "nombre": "Fundamentos de Ciberseguridad",
+      "titulo": "Fundamentos de Ciberseguridad",
+      "descripcion": "Conoce los principios de seguridad informática, protección de datos, amenazas y buenas prácticas digitales.",
+      "categoria": "Ciberseguridad",
+      "nivel": "Básico",
+      "duracion": "7 semanas",
+      "docente": "Jorge Paredes",
+      "precio": 170,
+      "stock": 9,
+      "imagen": "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "8",
+      "nombre": "Scrum para Equipos Ágiles",
+      "titulo": "Scrum para Equipos Ágiles",
+      "descripcion": "Aprende roles, eventos, artefactos y prácticas ágiles para gestionar proyectos de software de forma colaborativa.",
+      "categoria": "Scrum",
+      "nivel": "Intermedio",
+      "duracion": "4 semanas",
+      "docente": "Patricia Salazar",
+      "precio": 110,
+      "stock": 16,
+      "imagen": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=800&auto=format&fit=crop"
+    }
+  ],
+  "ofertas": [
+    {
+      "id": "1",
+      "titulo": "Pack Desarrollo Web",
+      "descripcion": "Incluye los cursos de JavaScript Básico, React desde Cero y Diseño Web con Tailwind.",
+      "precioAnterior": 400,
+      "precioOferta": 299,
+      "descuento": "25%",
+      "imagen": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "2",
+      "titulo": "Pack Programador Full Stack",
+      "descripcion": "Combina React, Base de Datos con MySQL y Desarrollo Full Stack para fortalecer tu perfil profesional.",
+      "precioAnterior": 580,
+      "precioOferta": 430,
+      "descuento": "26%",
+      "imagen": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "3",
+      "titulo": "Combo Estudiante Tecnológico",
+      "descripcion": "Mouse inalámbrico, teclado mecánico y audífonos Bluetooth para mejorar tu espacio de estudio.",
+      "precioAnterior": 310,
+      "precioOferta": 245,
+      "descuento": "21%",
+      "imagen": "https://images.unsplash.com/photo-1527814050087-3793815479db?q=80&w=800&auto=format&fit=crop"
+    },
+    {
+      "id": "4",
+      "titulo": "Pack Productividad Académica",
+      "descripcion": "Tablet Samsung Galaxy Tab y memoria USB Kingston para clases, apuntes y almacenamiento de trabajos.",
+      "precioAnterior": 928,
+      "precioOferta": 820,
+      "descuento": "12%",
+      "imagen": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800&auto=format&fit=crop"
+    }
+  ],
+  "servicios": [
+    {
+      "id": "1",
+      "titulo": "Asesoría Académica",
+      "descripcion": "Orientación personalizada para estudiantes que desean reforzar sus conocimientos tecnológicos."
+    },
+    {
+      "id": "2",
+      "titulo": "Venta de Equipos Tecnológicos",
+      "descripcion": "Catálogo de productos seleccionados para estudiantes, profesionales y emprendedores."
+    },
+    {
+      "id": "3",
+      "titulo": "Capacitación Digital",
+      "descripcion": "Cursos prácticos en programación, diseño web, herramientas digitales y productividad."
+    },
+    {
+      "id": "4",
+      "titulo": "Acompañamiento en Proyectos",
+      "descripcion": "Apoyo para organizar, desarrollar y presentar proyectos académicos o tecnológicos."
+    }
+  ],
+  "mensajes": [
+    {
+      "nombre": "Yulisa Nayra Guerrero",
+      "correo": "yulisaodalisnayraguerrero@gmail.com",
+      "asunto": "Información sobre los cursos",
+      "mensaje": "Necesito llevar un curso de sus plataforma, y necesito saber si obtendré algún descuento",
+      "fecha": "2026-07-03T08:54:00.213Z",
+      "id": "Bleuz0Cmsdg"
+    },
+    {
+      "nombre": "Yulisa Guerrero",
+      "correo": "yulisaodalisnayraguerrero@gmail.com",
+      "asunto": "Información de productos",
+      "mensaje": "Necesito comprar muchos productos y necesito información más concreta",
+      "fecha": "2026-07-03T08:58:46.414Z",
+      "id": "z8rLqX1dF0c"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
