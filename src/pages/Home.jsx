@@ -137,9 +137,9 @@ export default function Home() {
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
-                <p className="text-2xl font-extrabold text-blue-700">100%</p>
+                <p className="text-2xl font-extrabold text-blue-700">500%</p>
                 <p className="mt-1 text-xs font-semibold text-slate-500">
-                  Responsive
+                  100% original lo hemos hecho Yulisa y Miguel
                 </p>
               </div>
             </div>

@@ -255,6 +255,14 @@
       "mensaje": "Necesito comprar muchos productos y necesito información más concreta",
       "fecha": "2026-07-03T08:58:46.414Z",
       "id": "z8rLqX1dF0c"
+    },
+    {
+      "nombre": "Miguel Alarcon",
+      "correo": "miguel.alarconescriba@gmail.com",
+      "asunto": "Quiero pizza",
+      "mensaje": "Deseo que su tienda venda pizza y no mouses.",
+      "fecha": "2026-07-03T23:03:00.114Z",
+      "id": "HjoHBd9K0JM"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
