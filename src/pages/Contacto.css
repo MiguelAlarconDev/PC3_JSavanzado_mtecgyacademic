@@ -1,0 +1,17 @@
+.contenedor {
+    padding: 20px;
+}
+.card {
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    background: var(--card);
+}
+.form-control {
+    border: 1px solid #d1d5db;
+    padding: 12px 14px;
+    border-radius: 8px;
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-600));
+    border: none;
+}
