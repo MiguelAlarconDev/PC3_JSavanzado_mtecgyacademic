@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react';
 import ProductCard from '../components/ProductCard';
+import SectionTitle from '../components/SectionTitle';
 import productService from '../services/productService';
 import { useCarrito } from '../context/CarritoContext';
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [productosFiltrados, setProductosFiltrados] = useState([]);
-  const [categorias, setCategorias] = useState([]);
   const [busqueda, setBusqueda] = useState('');
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
+  const [categoria, setCategoria] = useState('Todas');
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
-  const [mensajeCarrito, setMensajeCarrito] = useState('');
 
   const carrito = useCarrito();
 
@@ -25,19 +24,11 @@ export default function Productos() {
 
         setProductos(data);
         setProductosFiltrados(data);
-
-        const categoriasUnicas = Array.from(
-          new Set(data.map((producto) => producto.categoria))
-        );
-
-        setCategorias(['Todas', ...categoriasUnicas]);
       } catch (err) {
-        console.error('Error cargando productos:', err);
+        console.error('Error al cargar productos:', err);
         setError(
-          'No se pudieron cargar los productos. Verifica que JSON Server esté activo.'
+          'No se pudieron cargar los productos. Verifica que JSON Server esté activo con npm run server.'
         );
-        setProductos([]);
-        setProductosFiltrados([]);
       } finally {
         setCargando(false);
       }
@@ -47,117 +38,158 @@ export default function Productos() {
   }, []);
 
   useEffect(() => {
-    const resultado = productos.filter((producto) => {
-      const coincideBusqueda =
-        producto.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(busqueda.toLowerCase());
+    let resultado = [...productos];
 
-      const coincideCategoria =
-        categoriaSeleccionada === 'Todas' ||
-        producto.categoria === categoriaSeleccionada;
+    if (categoria !== 'Todas') {
+      resultado = resultado.filter(
+        (producto) =>
+          producto.categoria?.toLowerCase() === categoria.toLowerCase()
+      );
+    }
 
-      return coincideBusqueda && coincideCategoria;
-    });
+    if (busqueda.trim() !== '') {
+      const textoBusqueda = busqueda.trim().toLowerCase();
+
+      resultado = resultado.filter((producto) => {
+        const nombre = producto.nombre?.toLowerCase() || '';
+        const descripcion = producto.descripcion?.toLowerCase() || '';
+        const categoriaProducto = producto.categoria?.toLowerCase() || '';
+
+        return (
+          nombre.includes(textoBusqueda) ||
+          descripcion.includes(textoBusqueda) ||
+          categoriaProducto.includes(textoBusqueda)
+        );
+      });
+    }
 
     setProductosFiltrados(resultado);
-  }, [busqueda, categoriaSeleccionada, productos]);
+  }, [busqueda, categoria, productos]);
 
-  function agregarAlCarrito(producto) {
-    console.log('Producto recibido en Productos.jsx:', producto);
+  const categorias = [
+    'Todas',
+    ...new Set(productos.map((producto) => producto.categoria).filter(Boolean)),
+  ];
 
+  function handleAgregarProducto(producto) {
     if (!carrito || typeof carrito.agregarProducto !== 'function') {
-      console.error('El contexto del carrito no está disponible.');
-      setMensajeCarrito('No se pudo agregar el producto. Revisa el carrito.');
+      console.error('No se pudo conectar con el carrito.');
       return;
     }
 
     carrito.agregarProducto(producto);
-    setMensajeCarrito(`${producto.nombre} se agregó al carrito.`);
-
-    setTimeout(() => {
-      setMensajeCarrito('');
-    }, 2500);
   }
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <section className="bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl text-center">
-          <span className="inline-flex rounded-full bg-blue-100 px-5 py-2 text-sm font-bold text-blue-700">
-            Productos MTECGYacademic
+      <section className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <span className="inline-flex rounded-full bg-blue-100 px-5 py-2 text-sm font-extrabold text-blue-700">
+            Productos
           </span>
+
+          <h1 className="mt-5 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+            Recursos tecnológicos para tu aprendizaje
+          </h1>
+
+          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600">
+            Explora productos académicos y tecnológicos disponibles en MTECGY
+            Academic. Puedes filtrar, buscar y agregar productos al carrito.
+          </p>
         </div>
       </section>
 
       <section className="px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">
-              Productos disponibles
-            </h1>
-          </div>
+          <SectionTitle
+            etiqueta="Catálogo"
+            titulo="Productos disponibles"
+            descripcion="La información se obtiene dinámicamente desde JSON Server usando Fetch API."
+          />
 
-          {mensajeCarrito && (
-            <div className="fixed right-5 top-24 z-[999] max-w-sm rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-700 shadow-lg">
-              {mensajeCarrito}
+          <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
+              <div>
+                <label
+                  htmlFor="busqueda"
+                  className="mb-2 block text-sm font-extrabold text-slate-700"
+                >
+                  Buscar producto
+                </label>
+
+                <input
+                  id="busqueda"
+                  type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  placeholder="Buscar por nombre, descripción o categoría"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="categoria"
+                  className="mb-2 block text-sm font-extrabold text-slate-700"
+                >
+                  Categoría
+                </label>
+
+                <select
+                  id="categoria"
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                >
+                  {categorias.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          )}
-
-          <div className="mx-auto mb-8 grid max-w-3xl gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-[1fr_220px]">
-            <input
-              type="text"
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              placeholder="Buscar producto..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
-
-            <select
-              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              value={categoriaSeleccionada}
-              onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-            >
-              {categorias.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {categoria}
-                </option>
-              ))}
-            </select>
           </div>
 
           {cargando && (
-            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center font-semibold text-blue-700">
-              Cargando productos...
+            <div className="mt-10 rounded-[2rem] border border-blue-100 bg-white p-8 text-center shadow-sm">
+              <p className="text-lg font-black text-slate-950">
+                Cargando productos...
+              </p>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Verifica que JSON Server esté ejecutándose.
+              </p>
             </div>
           )}
 
           {error && (
-            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center font-semibold text-red-700">
+            <div className="mt-10 rounded-2xl border border-red-100 bg-red-50 p-5 text-sm font-bold text-red-700">
               {error}
             </div>
           )}
 
+          {!cargando && !error && productosFiltrados.length === 0 && (
+            <div className="mt-10 rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-sm">
+              <p className="text-lg font-black text-slate-950">
+                No se encontraron productos
+              </p>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Intenta con otra búsqueda o categoría.
+              </p>
+            </div>
+          )}
+
           {!cargando && !error && productosFiltrados.length > 0 && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
               {productosFiltrados.map((producto) => (
                 <ProductCard
                   key={producto.id}
                   producto={producto}
-                  onAgregar={agregarAlCarrito}
+                  onAgregar={handleAgregarProducto}
                 />
               ))}
-            </div>
-          )}
-
-          {!cargando && !error && productosFiltrados.length === 0 && (
-            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-8 text-center">
-              <h2 className="text-2xl font-bold text-slate-900">
-                No se encontraron productos
-              </h2>
-
-              <p className="mt-2 text-slate-600">
-                Intenta buscar con otro nombre o selecciona otra categoría.
-              </p>
             </div>
           )}
         </div>

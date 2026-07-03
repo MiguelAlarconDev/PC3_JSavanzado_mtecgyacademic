@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Registro() {
   const [nombre, setNombre] = useState('');
@@ -13,10 +14,13 @@ export default function Registro() {
     try {
       const raw = localStorage.getItem('usuarios');
       return raw ? JSON.parse(raw) : [];
-    } catch {
+    } catch (error) {
+      console.error('Error al leer usuarios desde localStorage:', error);
       return [];
     }
   });
+
+  const auth = useAuth();
 
   function validarEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -26,12 +30,6 @@ export default function Registro() {
     return /^(?=.*[A-Z])(?=.*\d).{8,}$/.test(passwordValor);
   }
 
-  function correoDuplicado(correoValor) {
-    return usuarios.some(
-      (usuario) => usuario.correo.toLowerCase() === correoValor.toLowerCase()
-    );
-  }
-
   function registrarUsuario(e) {
     e.preventDefault();
 
@@ -39,7 +37,7 @@ export default function Registro() {
     setMensajeExito('');
 
     const nombreLimpio = nombre.trim();
-    const correoLimpio = correo.trim();
+    const correoLimpio = correo.trim().toLowerCase();
 
     if (!nombreLimpio || !correoLimpio || !password) {
       setMensajeError('Todos los campos son obligatorios.');
@@ -63,24 +61,19 @@ export default function Registro() {
       return;
     }
 
-    if (correoDuplicado(correoLimpio)) {
-      setMensajeError('El correo electrónico ya está registrado.');
+    const resultado = auth.registrarUsuario({
+      nombre: nombreLimpio,
+      correo: correoLimpio,
+      password,
+    });
+
+    if (!resultado.ok) {
+      setMensajeError(resultado.mensaje);
       return;
     }
 
-    const nuevoUsuario = {
-      id: Date.now(),
-      nombre: nombreLimpio,
-      correo: correoLimpio,
-      fechaRegistro: new Date().toISOString(),
-    };
-
-    const usuariosActualizados = [...usuarios, nuevoUsuario];
-
-    setUsuarios(usuariosActualizados);
-    localStorage.setItem('usuarios', JSON.stringify(usuariosActualizados));
-
-    setMensajeExito('Registro exitoso. Ya puedes iniciar sesión en MTECGYacademic.');
+    setUsuarios(resultado.usuarios);
+    setMensajeExito('Usuario registrado correctamente. Ahora puedes iniciar sesión.');
     setNombre('');
     setCorreo('');
     setPassword('');
@@ -98,7 +91,7 @@ export default function Registro() {
       <section className="bg-gradient-to-br from-blue-50 via-white to-sky-50 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl text-center">
           <span className="inline-flex rounded-full bg-blue-100 px-5 py-2 text-sm font-bold text-blue-700">
-            Registro MTECGYacademic
+            Registro MTECGY Academic
           </span>
         </div>
       </section>
@@ -116,7 +109,7 @@ export default function Registro() {
               </h1>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Regístrate para formar parte de MTECGYacademic y acceder a una
+                Regístrate para formar parte de MTECGY Academic y acceder a una
                 experiencia académica más personalizada.
               </p>
             </div>
@@ -128,8 +121,17 @@ export default function Registro() {
             )}
 
             {mensajeExito && (
-              <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
-                {mensajeExito}
+              <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                <p className="text-sm font-bold text-emerald-700">
+                  {mensajeExito}
+                </p>
+
+                <Link
+                  to="/login"
+                  className="mt-4 inline-flex rounded-xl bg-emerald-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-emerald-700"
+                >
+                  Iniciar sesión
+                </Link>
               </div>
             )}
 
@@ -199,12 +201,14 @@ export default function Registro() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="mt-7 w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700"
-            >
-              Registrarse
-            </button>
+            <div className="pt-8">
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-extrabold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700"
+              >
+                Registrarse
+              </button>
+            </div>
 
             <div className="my-7 flex items-center gap-3">
               <div className="h-px flex-1 bg-slate-200" />
@@ -248,7 +252,7 @@ export default function Registro() {
 
             <p className="mt-3 text-sm leading-7 text-slate-600">
               Esta sección muestra los usuarios registrados localmente en la
-              plataforma.
+              plataforma. Por seguridad visual, no se muestran las contraseñas.
             </p>
 
             <div className="mt-6">
@@ -272,7 +276,14 @@ export default function Registro() {
                       </p>
 
                       <p className="mt-2 text-xs font-semibold text-slate-500">
-                        Registrado el: {formatearFecha(usuario.fechaRegistro)}
+                        Rol: {usuario.role || 'usuario'}
+                      </p>
+
+                      <p className="mt-2 text-xs font-semibold text-slate-500">
+                        Registrado el:{' '}
+                        {usuario.fechaRegistro
+                          ? formatearFecha(usuario.fechaRegistro)
+                          : 'Sin fecha registrada'}
                       </p>
                     </article>
                   ))}

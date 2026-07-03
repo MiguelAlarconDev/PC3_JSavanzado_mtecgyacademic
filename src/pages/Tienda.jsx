@@ -11,7 +11,6 @@ export default function Tienda() {
   const [ofertas, setOfertas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
-  const [mensajeCarrito, setMensajeCarrito] = useState('');
 
   const carrito = useCarrito();
 
@@ -44,12 +43,12 @@ export default function Tienda() {
   }, []);
 
   function agregarAlCarrito(producto) {
-    carrito.agregarProducto(producto);
-    setMensajeCarrito(`${producto.nombre} se agregó al carrito.`);
+    if (!carrito || typeof carrito.agregarProducto !== 'function') {
+      console.error('No se pudo conectar con el carrito.');
+      return;
+    }
 
-    setTimeout(() => {
-      setMensajeCarrito('');
-    }, 2500);
+    carrito.agregarProducto(producto);
   }
 
   return (
@@ -74,12 +73,6 @@ export default function Tienda() {
               seleccionadas para estudiantes que desean aprender y avanzar.
             </p>
           </div>
-
-          {mensajeCarrito && (
-            <div className="mx-auto mb-8 max-w-3xl rounded-2xl border border-emerald-100 bg-emerald-50 px-5 py-4 text-center text-sm font-bold text-emerald-700 shadow-sm">
-              {mensajeCarrito}
-            </div>
-          )}
 
           {cargando && (
             <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center font-semibold text-blue-700">
